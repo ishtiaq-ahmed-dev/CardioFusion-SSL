@@ -1,0 +1,102 @@
+# ─── Large data / model artefacts (excluded from GitHub) ─────────────────
+checkpoints/
+cache/
+logs/
+results/
+_extracted/
+
+# ─── Paper drafts (not part of code release) ─────────────────────────────
+paper/
+*.pdf
+!docs/**/*.pdf
+
+# ─── Datasets — never commit raw signals ────────────────────────────────
+DATASETS/
+datasets/
+*.npz
+*.mat
+*.wav
+*.dat
+*.hea
+*.edf
+!tests/fixtures/**
+
+# ─── Python ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ─── Virtual environments ────────────────────────────────────────────────
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ─── PyTorch / ML artefacts ──────────────────────────────────────────────
+*.pt
+*.pth
+*.ckpt
+*.pkl
+*.h5
+*.hdf5
+wandb/
+lightning_logs/
+mlruns/
+tensorboard/
+runs/
+
+# ─── Jupyter / notebooks ─────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+notebooks/*.ipynb
+
+# ─── IDE / editor ────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── OS ──────────────────────────────────────────────────────────────────
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# ─── Logs, temp ──────────────────────────────────────────────────────────
+*.log
+*.tmp
+tmp/
+temp/
+scratchpad/
+
+# ─── Local config ────────────────────────────────────────────────────────
+.env.local
+config.local.py
+secrets.yaml
+.claude/

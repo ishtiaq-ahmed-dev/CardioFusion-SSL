@@ -288,11 +288,11 @@ All experiments are deterministic given the seed (`SEED = 1337` in `configs/cfg.
 If you use this code, please cite the accompanying paper and the datasets you use (see [DATASETS.md](DATASETS.md)):
 
 ```bibtex
-@article{khattak2026cardiofusion,
+@article{ahmed2026cardiofusion,
   title   = {CardioFusion-SSL: Cross-Modal Self-Supervised Pretraining
              and Hierarchical Fusion for Multimodal ECG-PCG Cardiac Screening
              with Leakage-Free Cross-Dataset Validation},
-  author  = {Khattak, Ashfaq and others},
+  author  = {Ahmed, Ishtiaq and Ambreen, Abida and Jawad, Syeda Laiba},
   journal = {Computers in Biology and Medicine},
   year    = {2026},
   note    = {Manuscript in preparation}
@@ -313,10 +313,31 @@ MIT License — see [LICENSE](LICENSE) for full text. Datasets retain their orig
 
 ---
 
-## 👤 Author
+## 👥 Authors and Contributors
 
-**Ashfaq Khattak**
-Institute of Management Sciences (IMSciences), Peshawar, Pakistan
-📧 iashfaqkhattak9147@gmail.com
+### Lead author / project owner
+**Ishtiaq Ahmed** — BS Artificial Intelligence, Institute of Management Sciences (IMSciences), Peshawar, Pakistan
+📧 iashtiaqkhattak@gmail.com  |  bsai.246504300@imsciences.edu.pk
+🐙 [@ishtiaq-ahmed-dev](https://github.com/ishtiaq-ahmed-dev)
+*Conceptualization, methodology, software, investigation, formal analysis, data curation, writing — original draft, visualization.*
 
-*This work was supervised at IMSciences and prepared for submission to Computers in Biology and Medicine (Elsevier).*
+### Co-authors
+
+**Dr. Abida Ambreen** — Khyber Medical College (KMC), Peshawar, Pakistan
+📧 Abida.ambreen@kmc.edu.pk
+*Clinical collaborator — cardiology domain expertise, methodology guidance, writing — review and editing.*
+
+**Syeda Laiba Jawad** — BS Artificial Intelligence, Institute of Management Sciences (IMSciences), Peshawar, Pakistan
+📧 syedalaiba689@gmail.com
+*Methodology, investigation, writing — review and editing.*
+
+### Academic supervisor
+**Mr. Ali Haider** — Institute of Management Sciences (IMSciences), Peshawar, Pakistan
+*Project supervision, methodological guidance, and mentorship throughout the CardioFusion-SSL research.*
+
+### Corresponding author
+Ishtiaq Ahmed — iashtiaqkhattak@gmail.com
+
+---
+
+*This work was conducted at IMSciences Peshawar in collaboration with Khyber Medical College and is prepared for submission to Computers in Biology and Medicine (Elsevier).*

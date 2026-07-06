@@ -2,9 +2,18 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "CardioFusion-SSL: Cross-Modal Self-Supervised Pretraining and Hierarchical Fusion for Multimodal ECG-PCG Cardiac Screening"
 authors:
-  - family-names: "Khattak"
-    given-names: "Ashfaq"
-    email: "iashfaqkhattak9147@gmail.com"
+  - family-names: "Ahmed"
+    given-names: "Ishtiaq"
+    email: "iashtiaqkhattak@gmail.com"
+    affiliation: "Institute of Management Sciences (IMSciences), Peshawar, Pakistan"
+  - family-names: "Ambreen"
+    given-names: "Abida"
+    name-particle: "Dr."
+    email: "Abida.ambreen@kmc.edu.pk"
+    affiliation: "Khyber Medical College (KMC), Peshawar, Pakistan"
+  - family-names: "Jawad"
+    given-names: "Syeda Laiba"
+    email: "syedalaiba689@gmail.com"
     affiliation: "Institute of Management Sciences (IMSciences), Peshawar, Pakistan"
 version: 1.0.0
 date-released: 2026-07-06
@@ -23,8 +32,18 @@ preferred-citation:
   type: article
   title: "CardioFusion-SSL: Cross-Modal Self-Supervised Pretraining and Hierarchical Fusion for Multimodal ECG-PCG Cardiac Screening with Leakage-Free Cross-Dataset Validation"
   authors:
-    - family-names: "Khattak"
-      given-names: "Ashfaq"
+    - family-names: "Ahmed"
+      given-names: "Ishtiaq"
+      email: "iashtiaqkhattak@gmail.com"
+      affiliation: "Institute of Management Sciences (IMSciences), Peshawar, Pakistan"
+    - family-names: "Ambreen"
+      given-names: "Abida"
+      email: "Abida.ambreen@kmc.edu.pk"
+      affiliation: "Khyber Medical College (KMC), Peshawar, Pakistan"
+    - family-names: "Jawad"
+      given-names: "Syeda Laiba"
+      email: "syedalaiba689@gmail.com"
+      affiliation: "Institute of Management Sciences (IMSciences), Peshawar, Pakistan"
   journal: "Computers in Biology and Medicine"
   year: 2026
-  notes: "Manuscript in preparation"
+  notes: "Manuscript in preparation. Corresponding author: Ishtiaq Ahmed (iashtiaqkhattak@gmail.com)."
