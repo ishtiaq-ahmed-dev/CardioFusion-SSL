@@ -154,19 +154,26 @@ def ensemble_evaluate_with_filter(
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--batch", type=int, default=128)
+    ap.add_argument("--ckpt-dir", type=str, default=None,
+                    help="Directory containing fold checkpoints. Default = CFG.CHECKPOINT_DIR")
+    ap.add_argument("--ckpt-glob", type=str, default="fold_*_best.pt",
+                    help="Glob pattern for checkpoint files.")
+    ap.add_argument("--out-suffix", type=str, default="",
+                    help="Appended to the results filename, e.g. '_v2' -> external_validation_results_v2.json")
     args = ap.parse_args()
 
     device = CFG.device()
     print(f"[ext_eval] device = {device}")
 
     # find all fold checkpoints
-    ckpt_paths = sorted(CFG.CHECKPOINT_DIR.glob("fold_*_best.pt"),
-                        key=lambda p: int(p.stem.split("_")[1]))
+    ckpt_dir = Path(args.ckpt_dir) if args.ckpt_dir else CFG.CHECKPOINT_DIR
+    ckpt_paths = sorted(ckpt_dir.glob(args.ckpt_glob),
+                        key=lambda p: p.stem)
     if not ckpt_paths:
         raise FileNotFoundError(
-            f"No fold checkpoints found in {CFG.CHECKPOINT_DIR}. "
+            f"No checkpoints matching '{args.ckpt_glob}' in {ckpt_dir}. "
             "Run finetune (or run_parallel_folds) first.")
-    print(f"[ext_eval] Found {len(ckpt_paths)} fold checkpoints: "
+    print(f"[ext_eval] Found {len(ckpt_paths)} checkpoints: "
           f"{[p.stem for p in ckpt_paths]}")
     ckpt_paths = [str(p) for p in ckpt_paths]
 
@@ -238,7 +245,7 @@ def main():
     )
 
     # ------------------------------------------------------------------ save
-    out_path = CFG.RESULTS_DIR / "external_validation_results.json"
+    out_path = CFG.RESULTS_DIR / f"external_validation_results{args.out_suffix}.json"
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\n[ext_eval] Saved -> {out_path}")

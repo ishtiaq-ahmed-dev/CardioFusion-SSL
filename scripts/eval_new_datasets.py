@@ -442,16 +442,24 @@ def evaluate_records(
 # ════════════════════════════════════════════════════════════════════════════════
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--ckpt-dir", type=str, default=None,
+                    help="Directory containing fold checkpoints. Default = CFG.CHECKPOINT_DIR")
+    ap.add_argument("--ckpt-glob", type=str, default="fold_*_best.pt",
+                    help="Glob for checkpoint files.")
+    ap.add_argument("--out-suffix", type=str, default="",
+                    help="Filename suffix — '_v2' -> external_validation_new_datasets_v2.json")
+    args = ap.parse_args()
+
     device = CFG.device()
     print(f"[new_eval] device = {device}")
 
-    ckpt_paths = sorted(
-        CFG.CHECKPOINT_DIR.glob("fold_*_best.pt"),
-        key=lambda p: int(p.stem.split("_")[1]),
-    )
+    ckpt_dir = Path(args.ckpt_dir) if args.ckpt_dir else CFG.CHECKPOINT_DIR
+    ckpt_paths = sorted(ckpt_dir.glob(args.ckpt_glob), key=lambda p: p.stem)
     if not ckpt_paths:
-        raise FileNotFoundError(f"No fold checkpoints in {CFG.CHECKPOINT_DIR}")
-    print(f"[new_eval] {len(ckpt_paths)} fold checkpoints found")
+        raise FileNotFoundError(f"No checkpoints matching '{args.ckpt_glob}' in {ckpt_dir}")
+    print(f"[new_eval] {len(ckpt_paths)} checkpoints found")
     ckpt_paths = [str(p) for p in ckpt_paths]
 
     DATASETS_ROOT = CFG.DATASETS_ROOT
@@ -503,7 +511,7 @@ def main():
     )
 
     # ── Merge with existing external_validation_results.json ─────────────────
-    out_path = CFG.RESULTS_DIR / "external_validation_results.json"
+    out_path = CFG.RESULTS_DIR / f"external_validation_results{args.out_suffix}.json"
     existing = {}
     if out_path.exists():
         with open(out_path) as f:
