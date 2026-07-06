@@ -283,7 +283,16 @@ def main():
                                    meta, args, device)
             all_results.append(res)
 
-    # ── aggregate ───────────────────────────────────────────────────────
+    # ── per-fold save (single-fold parallel-launcher mode) ──────────────
+    if args.fold_only is not None:
+        fold_dir = CFG.RESULTS_DIR / "fold_results_v2"
+        fold_dir.mkdir(parents=True, exist_ok=True)
+        out_path = fold_dir / f"fold_{args.fold_only + 1}.json"
+        with open(out_path, "w") as f:
+            json.dump({"fold": args.fold_only + 1, "results": all_results}, f, indent=2)
+        print(f"\n[finetune_v2] fold {args.fold_only + 1} results -> {out_path}")
+
+    # ── aggregate (full run only) ───────────────────────────────────────
     if args.fold_only is None:
         agg = {}
         for m in all_results[0]["metrics"]:

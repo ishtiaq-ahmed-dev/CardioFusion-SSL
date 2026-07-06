@@ -15,6 +15,7 @@ Expected wall-clock on RTX 5070 Ti (16 GB VRAM):
 
 Progress is logged to results/tier23_pipeline.log.
 """
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -32,10 +33,14 @@ def run(cmd: list, stage: str, log_file):
     log_file.write(header)
     log_file.flush()
 
+    # Force UTF-8 in the child process and tolerate any stray bytes
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
     proc = subprocess.Popen(
         cmd, cwd=str(PROJECT_ROOT),
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         text=True, bufsize=1,
+        encoding="utf-8", errors="replace",
+        env=env,
     )
     for line in proc.stdout:
         print(line, end="", flush=True)
