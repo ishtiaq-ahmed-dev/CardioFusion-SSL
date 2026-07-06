@@ -318,7 +318,8 @@ MIT License — see [LICENSE](LICENSE) for full text. Datasets retain their orig
 ### Lead author / project owner
 **Ishtiaq Ahmed** — BS Artificial Intelligence, Institute of Management Sciences (IMSciences), Peshawar, Pakistan
 📧 iashtiaqkhattak@gmail.com  |  bsai.246504300@imsciences.edu.pk
-🐙 [@ishtiaq-ahmed-dev](https://github.com/ishtiaq-ahmed-dev)
+🆔 ORCID: [0009-0007-5485-211X](https://orcid.org/0009-0007-5485-211X)
+🐙 GitHub: [@ishtiaq-ahmed-dev](https://github.com/ishtiaq-ahmed-dev)
 *Conceptualization, methodology, software, investigation, formal analysis, data curation, writing — original draft, visualization.*
 
 ### Co-authors
