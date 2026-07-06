@@ -1,0 +1,38 @@
+# CardioFusion-SSL — Python dependencies
+#
+# PyTorch is installed separately from the nightly index for sm_120 (RTX 50xx) GPU support:
+#   pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+#
+# All other deps install normally:
+
+numpy>=1.26
+scipy>=1.11
+pandas>=2.1
+scikit-learn>=1.4
+matplotlib>=3.8
+seaborn>=0.13
+tqdm>=4.66
+
+# signals
+wfdb>=4.1
+librosa>=0.10
+soundfile>=0.12
+PyWavelets>=1.5
+
+# transformer / SSL extras
+transformers>=4.40
+einops>=0.7
+neurokit2>=0.2
+
+# optional: official Mamba SSM (linux + recent CUDA only; falls back to Transformer on Windows)
+# mamba-ssm>=2.2 ; sys_platform == 'linux'
+
+# eval / stats
+xgboost>=2.0
+shap>=0.45
+grad-cam>=1.4
+
+# notebook
+ipykernel>=6.29
+jupyter>=1.0
+nbformat>=5.10

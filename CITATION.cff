@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "CardioFusion-SSL: Cross-Modal Self-Supervised Pretraining and Hierarchical Fusion for Multimodal ECG-PCG Cardiac Screening"
+authors:
+  - family-names: "Khattak"
+    given-names: "Ashfaq"
+    email: "iashfaqkhattak9147@gmail.com"
+    affiliation: "Institute of Management Sciences (IMSciences), Peshawar, Pakistan"
+version: 1.0.0
+date-released: 2026-07-06
+url: "https://github.com/ishtiaq-ahmed-dev/CardioFusion-SSL"
+license: MIT
+keywords:
+  - electrocardiogram
+  - phonocardiogram
+  - multimodal fusion
+  - self-supervised learning
+  - deep learning
+  - cardiac screening
+  - cross-modal contrastive learning
+  - PyTorch
+preferred-citation:
+  type: article
+  title: "CardioFusion-SSL: Cross-Modal Self-Supervised Pretraining and Hierarchical Fusion for Multimodal ECG-PCG Cardiac Screening with Leakage-Free Cross-Dataset Validation"
+  authors:
+    - family-names: "Khattak"
+      given-names: "Ashfaq"
+  journal: "Computers in Biology and Medicine"
+  year: 2026
+  notes: "Manuscript in preparation"
