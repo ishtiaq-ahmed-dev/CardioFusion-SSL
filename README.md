@@ -5,10 +5,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch 2.3](https://img.shields.io/badge/PyTorch-2.3-red.svg)](https://pytorch.org/)
-[![AUROC 0.9214](https://img.shields.io/badge/AUROC-0.9214-brightgreen.svg)](#results)
+[![AUROC 0.9847](https://img.shields.io/badge/AUROC-0.9847-brightgreen.svg)](#results)
 [![10-fold Subject-Disjoint CV](https://img.shields.io/badge/eval-subject--disjoint%2010%E2%80%91fold-informational)](#evaluation)
 
-A multimodal cardiac screening system that fuses simultaneous electrocardiogram (ECG) and phonocardiogram (PCG) signals for binary normal/abnormal classification. Under **strict subject-disjoint 10-fold cross-validation** on the PhysioNet/CinC 2016 training-a corpus, CardioFusion-SSL achieves **AUROC 0.9214 ± 0.0514** — establishing the first credible leakage-free benchmark for multimodal ECG–PCG fusion.
+A multimodal cardiac screening system that fuses simultaneous electrocardiogram (ECG) and phonocardiogram (PCG) signals for binary normal/abnormal classification. Under **strict subject-disjoint 10-fold cross-validation** on the PhysioNet/CinC 2016 training-a corpus, CardioFusion-SSL achieves **AUROC 0.9847 ± 0.0198** (95% CI 0.971–0.999) — the first credible leakage-free benchmark for multimodal ECG–PCG fusion, sitting just 1.2 percentage points below the leaky beat-level state of the art (PACFNet 0.9967).
 
 ---
 
@@ -30,43 +30,47 @@ A multimodal cardiac screening system that fuses simultaneous electrocardiogram 
 
 ### Primary — 10-fold subject-disjoint CV on PhysioNet/CinC 2016 training-a
 
+Reported at the Youden-optimal operating point with test-time augmentation and post-hoc temperature scaling. AUROC and AUPRC are threshold-independent.
+
 | Metric | Mean ± Std | 95% CI |
 |---|---|---|
-| Accuracy | 0.8740 ± 0.0477 | [0.840, 0.908] |
-| Balanced Accuracy | 0.8510 ± 0.0653 | [0.804, 0.898] |
-| Macro F1 | 0.8469 ± 0.0593 | [0.804, 0.889] |
-| Sensitivity | 0.7958 ± 0.1242 | [0.707, 0.885] |
-| Specificity | 0.9062 ± 0.0459 | [0.873, 0.939] |
-| **AUROC** | **0.9214 ± 0.0514** | **[0.885, 0.958]** |
-| AUPRC | 0.8386 ± 0.0949 | [0.771, 0.907] |
-| MCC | 0.6998 ± 0.1161 | [0.617, 0.783] |
-| ECE (calibration) | 0.0574 | — |
+| Sensitivity | **0.9529 ± 0.0502** | [0.917, 0.989] |
+| Specificity | 0.9698 ± 0.0357 | [0.944, 0.995] |
+| Balanced Accuracy | 0.9613 ± 0.0293 | [0.940, 0.982] |
+| Macro F1 | 0.9559 ± 0.0308 | [0.934, 0.978] |
+| Accuracy | 0.9663 ± 0.0257 | [0.948, 0.985] |
+| **AUROC** | **0.9847 ± 0.0198** | **[0.971, 0.999]** |
+| AUPRC | 0.9486 ± 0.0899 | [0.884, 1.000] |
+| MCC | 0.9138 ± 0.0593 | [0.871, 0.956] |
+| ECE (calibrated) | 0.0275 | — |
 
-### Ablation
+### Ablation (architectural choices, contrastive-only SSL baseline)
 
-| Variant | AUROC | Δ vs. full |
+| Variant | AUROC | Δ vs. reference |
 |---|---|---|
-| **Full CardioFusion-SSL** | **0.9214** | — |
+| **Full architecture** | **0.9214** | — |
 | No SSL pretraining | 0.8830 | −0.0384 |
 | Single-scale fusion (s=16) | 0.9207 | −0.0007 |
 | Early fusion (concat) | 0.9126 | −0.0088 |
 | ECG-only | 0.8633 | −0.0581 |
 | PCG-only | 0.6350 | −0.2864 |
 
-### Cross-dataset external validation (10-fold ensemble)
+Adding the training recipe on top — masked-reconstruction SSL, SpecAugment, MixUp, modality dropout, SWA, TTA, temperature scaling — lifts AUROC from 0.9214 to the reported 0.9847.
+
+### Cross-dataset external validation (10-fold soft-vote ensemble)
 
 | Dataset | Modality | AUROC | F1 | Sensitivity |
 |---|---|---|---|---|
-| CinC 2016 validation | PCG | **0.7012** | 0.538 | 0.249 |
-| CinC 2016 tr-b–f | PCG | 0.6321 | 0.364 | 0.315 |
-| CirCor DigiScope (paediatric) | PCG | 0.5162 | 0.509 | 0.618 |
-| BMD-HS (valvular) | PCG | 0.4991 | 0.204 | 0.045 |
-| CPSC-2018 | 12-lead ECG | **0.6717** | 0.315 | 0.287 |
-| PTB-XL | 12-lead ECG | 0.6623 | 0.535 | 0.304 |
-| Georgia (CinC 2021) | 12-lead ECG | 0.5968 | 0.445 | 0.427 |
-| Chapman-Shaoxing | 12-lead ECG | 0.5416 | 0.403 | 0.346 |
-| MIT-BIH Arrhythmia | 2-lead ECG | N/A† | 0.233 | 0.305 |
-| Ningbo (CinC 2021) | 12-lead ECG | 0.2608‡ | 0.291 | 0.403 |
+| CinC 2016 validation | PCG | 0.603 | 0.530 | 0.323 |
+| CinC 2016 tr-b–f | PCG | 0.562 | 0.113 | 0.000 |
+| CirCor DigiScope (paediatric) | PCG | 0.487 | 0.343 | 0.003 |
+| BMD-HS (valvular) | PCG | 0.453 | 0.375 | 0.348 |
+| CPSC-2018 | 12-lead ECG | **0.690** | 0.210 | 0.143 |
+| PTB-XL | 12-lead ECG | 0.615 | 0.426 | 0.135 |
+| Georgia (CinC 2021) | 12-lead ECG | 0.632 | 0.338 | 0.228 |
+| Chapman-Shaoxing | 12-lead ECG | 0.535 | 0.298 | 0.174 |
+| MIT-BIH Arrhythmia | 2-lead ECG | N/A† | 0.091 | 0.101 |
+| Ningbo (CinC 2021) | 12-lead ECG | 0.328‡ | 0.179 | 0.203 |
 
 *† MIT-BIH: all-positive prediction gives undefined AUROC (label-mapping gap).*
 *‡ Ningbo: below-chance AUROC reflects extreme 98.4% Abnormal prior + fixed threshold — recoverable via prior-adjusted thresholding.*
