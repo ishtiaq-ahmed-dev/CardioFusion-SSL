@@ -328,9 +328,9 @@ MIT License — see [LICENSE](LICENSE) for full text. Datasets retain their orig
 
 ### Co-authors
 
-**Dr. Abida Ambreen** — Khyber Medical College (KMC), Peshawar, Pakistan
+**Dr. Abida Ambreen, MBBS** — Khyber Medical College (KMC), Peshawar, Pakistan
 📧 Abida.ambreen@kmc.edu.pk
-*Clinical collaborator — cardiology domain expertise, methodology guidance, writing — review and editing.*
+*Medical co-author — general clinical review, verification of pathology descriptions against standard medical usage, writing — review and editing.*
 
 **Syeda Laiba Jawad** — BS Artificial Intelligence, Institute of Management Sciences (IMSciences), Peshawar, Pakistan
 📧 syedalaiba689@gmail.com

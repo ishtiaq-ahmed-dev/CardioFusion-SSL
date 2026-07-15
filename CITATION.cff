@@ -10,6 +10,7 @@ authors:
   - family-names: "Ambreen"
     given-names: "Abida"
     name-particle: "Dr."
+    name-suffix: "MBBS"
     email: "Abida.ambreen@kmc.edu.pk"
     affiliation: "Khyber Medical College (KMC), Peshawar, Pakistan"
   - family-names: "Jawad"
