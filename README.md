@@ -297,9 +297,9 @@ If you use this code, please cite the accompanying paper and the datasets you us
              and Hierarchical Fusion for Multimodal ECG-PCG Cardiac Screening
              with Leakage-Free Cross-Dataset Validation},
   author  = {Ahmed, Ishtiaq and Ambreen, Abida and Jawad, Syeda Laiba},
-  journal = {Computers in Biology and Medicine},
+  journal = {IEEE Journal of Biomedical and Health Informatics},
   year    = {2026},
-  note    = {Manuscript in preparation}
+  note    = {Under review}
 }
 ```
 
