@@ -99,4 +99,3 @@ scratchpad/
 .env.local
 config.local.py
 secrets.yaml
-.claude/

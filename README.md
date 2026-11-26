@@ -1,295 +1,227 @@
+<div align="center">
+
 # CardioFusion-SSL
 
-**Cross-Modal Self-Supervised Pretraining and Hierarchical Fusion for Multimodal ECG–PCG Cardiac Screening with Leakage-Free Cross-Dataset Validation**
+### Multimodal ECG + PCG cardiac screening with cross-modal self-supervision
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch 2.3](https://img.shields.io/badge/PyTorch-2.3-red.svg)](https://pytorch.org/)
-[![AUROC 0.9847](https://img.shields.io/badge/AUROC-0.9847-brightgreen.svg)](#results)
-[![10-fold Subject-Disjoint CV](https://img.shields.io/badge/eval-subject--disjoint%2010%E2%80%91fold-informational)](#evaluation)
+Cross-Modal Self-Supervised Pretraining and Hierarchical Fusion for Multimodal ECG–PCG Cardiac Screening with Leakage-Free Cross-Dataset Validation
 
-A multimodal cardiac screening system that fuses simultaneous electrocardiogram (ECG) and phonocardiogram (PCG) signals for binary normal/abnormal classification. Under **strict subject-disjoint 10-fold cross-validation** on the PhysioNet/CinC 2016 training-a corpus, CardioFusion-SSL achieves **AUROC 0.9847 ± 0.0198** (95% CI 0.971–0.999) — the first credible leakage-free benchmark for multimodal ECG–PCG fusion, sitting just 1.2 percentage points below the leaky beat-level state of the art (PACFNet 0.9967).
+[![Paper](https://img.shields.io/badge/IEEE%20JBHI-under%20review-00629B?style=flat-square)](#citation)
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.3%2B-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![License](https://img.shields.io/badge/License-MIT-2EA44F?style=flat-square)](LICENSE)
+[![AUROC](https://img.shields.io/badge/AUROC-0.985-informational?style=flat-square)](#results)
 
----
+[Results](#results) · [Architecture](#architecture) · [Installation](#installation) · [Usage](#usage) · [Evaluation](#evaluation-protocol) · [Citation](#citation)
 
-## 🎯 Key Contributions
-
-1. **Cross-modal self-supervised pretraining** — CLIP-style contrastive learning on 12,412 paired ECG+PCG segments (PhysioNet/CinC 2016 training-a + EPHNOGRAM), exploiting the natural electromechanical coupling as an inherent positive-pair signal. Achieves **91.4% top-1 cross-modal retrieval**; contributes **+0.038 AUROC** to downstream classification.
-
-2. **Hierarchical multi-scale bidirectional fusion** — cross-attention operates at three temporal scales simultaneously: sub-beat (~62.5 ms), cardiac-cycle (~250 ms), and recording (~1 s). Captures QRS–S1 latency, cycle synchrony, and global rhythm coordination.
-
-3. **Missing-modality robustness** — learned missing-modality tokens allow a single trained model to accept paired, ECG-only, or PCG-only inputs without retraining. Deployable across community stethoscopes, ambulatory Holter monitors, and full hospital cardiology suites.
-
-4. **Leakage-free evaluation benchmark** — 10-fold subject-disjoint CV where no subject appears in both training and test folds. Contrast with prior beat-level 5-fold CV (e.g., PACFNet 2025 AUROC 0.9967), which admits ~7.5 percentage-point evaluation-methodology inflation.
-
-5. **Systematic ten-dataset external validation** — evaluated on ten independent public datasets across PCG-only and ECG-only modes. The most comprehensive cross-dataset evaluation of multimodal ECG–PCG fusion to date.
+</div>
 
 ---
 
-## 📊 Results
+CardioFusion-SSL classifies heart recordings as normal or abnormal using the electrocardiogram (ECG) and phonocardiogram (PCG) together. The two signals are recorded at the same time, so each heartbeat appears once electrically and once acoustically. We pretrain the encoders to match the two views without labels, then fuse them at three time scales for classification.
 
-### Primary — 10-fold subject-disjoint CV on PhysioNet/CinC 2016 training-a
+On PhysioNet/CinC 2016 training-a, with **subject-disjoint 10-fold cross-validation** (no patient appears in both train and test), the model reaches:
 
-Reported at the Youden-optimal operating point with test-time augmentation and post-hoc temperature scaling. AUROC and AUPRC are threshold-independent.
+<div align="center">
 
-| Metric | Mean ± Std | 95% CI |
-|---|---|---|
-| Sensitivity | **0.9529 ± 0.0502** | [0.917, 0.989] |
+| AUROC | Sensitivity | Specificity | Balanced Acc. | MCC | ECE |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| **0.9847** ± 0.020 | **0.9529** ± 0.050 | **0.9698** ± 0.036 | **0.9613** ± 0.029 | **0.9138** ± 0.059 | **0.028** |
+
+</div>
+
+Earlier multimodal results on this corpus (for example PACFNet, AUROC 0.9967) split data at the beat level, so beats from one patient end up in both train and test. Our protocol does not allow that, and the gap to that figure is 1.2 points.
+
+## Highlights
+
+- **Cross-modal pretraining.** Contrastive (InfoNCE) plus masked-reconstruction objectives on 12,412 paired ECG/PCG segments from CinC 2016 and EPHNOGRAM. The pretrained encoders retrieve the matching segment from the other modality 91.4% of the time (top-1), and pretraining adds about +0.038 AUROC downstream.
+- **Hierarchical fusion.** Bidirectional cross-attention runs at sub-beat (~62 ms), cardiac-cycle (~250 ms) and recording (~1 s) scales, so the model can use QRS–S1 timing, beat-to-beat synchrony and overall rhythm.
+- **Works with one signal missing.** Learned placeholder tokens stand in for an absent modality. The same checkpoint accepts paired, ECG-only or PCG-only input.
+- **Leakage-free benchmark.** Folds are split by subject, and the splitting is fixed by seed so results can be reproduced.
+- **External validation on ten public datasets.** Four PCG and six ECG corpora, reported in full, including the datasets where the model does poorly.
+
+## Results
+
+### Internal: subject-disjoint 10-fold CV (CinC 2016 training-a)
+
+Threshold set at the Youden-optimal point. Predictions use test-time augmentation and temperature scaling (T = 0.73). AUROC and AUPRC do not depend on the threshold.
+
+| Metric | Mean ± SD | 95% CI |
+|:---|:---:|:---:|
+| **AUROC** | **0.9847 ± 0.0198** | [0.971, 0.999] |
+| AUPRC | 0.9486 ± 0.0899 | [0.884, 1.000] |
+| Sensitivity | 0.9529 ± 0.0502 | [0.917, 0.989] |
 | Specificity | 0.9698 ± 0.0357 | [0.944, 0.995] |
-| Balanced Accuracy | 0.9613 ± 0.0293 | [0.940, 0.982] |
+| Balanced accuracy | 0.9613 ± 0.0293 | [0.940, 0.982] |
 | Macro F1 | 0.9559 ± 0.0308 | [0.934, 0.978] |
 | Accuracy | 0.9663 ± 0.0257 | [0.948, 0.985] |
-| **AUROC** | **0.9847 ± 0.0198** | **[0.971, 0.999]** |
-| AUPRC | 0.9486 ± 0.0899 | [0.884, 1.000] |
 | MCC | 0.9138 ± 0.0593 | [0.871, 0.956] |
 | ECE (calibrated) | 0.0275 | — |
 
-### Ablation (architectural choices, contrastive-only SSL baseline)
+### Ablation
 
-| Variant | AUROC | Δ vs. reference |
-|---|---|---|
-| **Full architecture** | **0.9214** | — |
-| No SSL pretraining | 0.8830 | −0.0384 |
-| Single-scale fusion (s=16) | 0.9207 | −0.0007 |
-| Early fusion (concat) | 0.9126 | −0.0088 |
-| ECG-only | 0.8633 | −0.0581 |
-| PCG-only | 0.6350 | −0.2864 |
+Architecture ablations use the base recipe (contrastive-only pretraining, no augmentation, no TTA), which explains the lower reference AUROC.
 
-Adding the training recipe on top — masked-reconstruction SSL, SpecAugment, MixUp, modality dropout, SWA, TTA, temperature scaling — lifts AUROC from 0.9214 to the reported 0.9847.
+| Variant | AUROC | Δ |
+|:---|:---:|:---:|
+| **Full model** | **0.9214** | — |
+| Without SSL pretraining | 0.8830 | −0.0384 |
+| Single-scale fusion (s = 16) | 0.9207 | −0.0007 |
+| Early fusion (concatenation) | 0.9126 | −0.0088 |
+| ECG only | 0.8633 | −0.0581 |
+| PCG only | 0.6350 | −0.2864 |
 
-### Cross-dataset external validation (10-fold soft-vote ensemble)
+The full training recipe (masked reconstruction, SpecAugment, MixUp, modality dropout, SWA, TTA and temperature scaling) raises AUROC from 0.9214 to 0.9847.
+
+### External validation (10-fold soft-vote ensemble, single modality)
 
 | Dataset | Modality | AUROC | F1 | Sensitivity |
-|---|---|---|---|---|
+|:---|:---|:---:|:---:|:---:|
 | CinC 2016 validation | PCG | 0.603 | 0.530 | 0.323 |
-| CinC 2016 tr-b–f | PCG | 0.562 | 0.113 | 0.000 |
+| CinC 2016 training-b–f | PCG | 0.562 | 0.113 | 0.000 |
 | CirCor DigiScope (paediatric) | PCG | 0.487 | 0.343 | 0.003 |
 | BMD-HS (valvular) | PCG | 0.453 | 0.375 | 0.348 |
 | CPSC-2018 | 12-lead ECG | **0.690** | 0.210 | 0.143 |
 | PTB-XL | 12-lead ECG | 0.615 | 0.426 | 0.135 |
 | Georgia (CinC 2021) | 12-lead ECG | 0.632 | 0.338 | 0.228 |
 | Chapman-Shaoxing | 12-lead ECG | 0.535 | 0.298 | 0.174 |
-| MIT-BIH Arrhythmia | 2-lead ECG | N/A† | 0.091 | 0.101 |
-| Ningbo (CinC 2021) | 12-lead ECG | 0.328‡ | 0.179 | 0.203 |
+| MIT-BIH Arrhythmia | 2-lead ECG | n/a¹ | 0.091 | 0.101 |
+| Ningbo (CinC 2021) | 12-lead ECG | 0.328² | 0.179 | 0.203 |
 
-*† MIT-BIH: all-positive prediction gives undefined AUROC (label-mapping gap).*
-*‡ Ningbo: below-chance AUROC reflects extreme 98.4% Abnormal prior + fixed threshold — recoverable via prior-adjusted thresholding.*
+<sub>¹ Every record is predicted positive, so AUROC is undefined (label-mapping gap). ² Below chance because 98.4% of Ningbo records are abnormal and the threshold is fixed; prior-adjusted thresholding recovers this.</sub>
 
----
+These numbers are a large drop from the internal results. A model trained on paired signals from 405 subjects does not transfer well to single-modality data from other devices, populations and label definitions. We report the results in full rather than leave them out.
 
-## 🏗 Architecture
+## Architecture
 
-Total parameters: **20.24 M**
-
-```
-   ECG Encoder (4.75 M)        PCG Encoder (4.83 M)
-   ─────────────────────       ─────────────────────
-   Patch stem (k=25)           Mel spectrogram (128×111)
-      │                          │
-   Sinusoidal PE                 2D patch embed (16×16)
-      │                          │
-   6× Transformer / Mamba        6× AST Transformer
-      │                          │
-   80 tokens × 256d              48 tokens × 256d
-      │                          │
-      └────────┬─────────────────┘
-               ▼
-      Hierarchical Fusion (9.48 M)
-      Bidirectional cross-attention at scales {4, 16, 64}
-               │
-               ▼
-      Concatenated 1536-d representation
-               │
-               ▼
-      Classifier Head (1.18 M): Linear→LN→GELU→Dropout→Linear
-               │
-               ▼
-      Binary output (Normal / Abnormal)
-```
-
-Missing-modality tokens (`m_ecg`, `m_pcg`) substitute for absent modalities; the same 20.24 M model handles paired, ECG-only, and PCG-only inputs.
-
----
-
-## 📁 Project Layout
+20.24 M parameters in total.
 
 ```
-CardioFusion-SSL/
-├── configs/cfg.py               # Single source of truth for all hyperparameters
-├── models/                      # Model definitions
-│   ├── mamba_ecg.py            #   ECG encoder (Mamba SSM + Transformer fallback)
-│   ├── ast_pcg.py              #   PCG encoder (AST-style Transformer on mel)
-│   ├── hier_fusion.py          #   Hierarchical multi-scale bidirectional fusion
-│   ├── ssl_heads.py            #   SSL projection heads (InfoNCE)
-│   └── full_model.py           #   End-to-end model composition
-├── pretraining/                 # Cross-modal SSL
-│   ├── contrastive.py          #   NT-Xent / InfoNCE cross-modal loss
-│   ├── masked.py               #   Masked-reconstruction auxiliary loss
-│   ├── data_pair_miner.py      #   Paired/unpaired clip mining for SSL
-│   └── ssl_trainer.py          #   Pretraining loop
-├── training/                    # Supervised fine-tuning
-│   ├── finetune.py             #   Fine-tune from SSL checkpoint
-│   └── cross_dataset_eval.py   #   External validation across datasets
-├── data/adapter.py              # Cache loader + PairedCacheDataset
-├── scripts/                     # CLI entry points
-│   ├── smoke_test.py           #   Verifies forward/backward on synthetic batch
-│   ├── pretrain.py             #   SSL pretraining
-│   ├── finetune.py             #   Supervised 10-fold CV fine-tuning
-│   ├── ablation.py             #   All 5 ablation variants
-│   ├── run_external_eval.py    #   6-dataset cache-based external eval
-│   ├── eval_new_datasets.py    #   4-dataset raw-file external eval
-│   │                           #   (BMD-HS, CinC2016-val, Georgia, Ningbo)
-│   ├── run_stats_tests.py      #   ECE + fold-mean AUROC comparisons
-│   └── run_parallel_folds.py   #   Parallel 10-fold training on single GPU
-├── utils/
-│   ├── visualise.py            #   Publication-quality plot generation
-│   └── stats.py                #   McNemar / Wilcoxon / DeLong / ECE
-├── tests/                       # pytest unit tests
-├── requirements.txt             # Python dependencies
-├── DATASETS.md                  # All dataset download links + label mappings
-├── LICENSE                      # MIT
-└── README.md                    # This file
+      ECG encoder · 4.75 M               PCG encoder · 4.83 M
+      ────────────────────               ────────────────────
+      patch stem (k = 25)                log-mel spectrogram (128 × 111)
+      sinusoidal positions               2-D patch embedding (16 × 16)
+      6 × Mamba / Transformer            6 × AST Transformer
+      80 tokens × 256                    48 tokens × 256
+                 │                                  │
+                 └────────────────┬─────────────────┘
+                                  ▼
+                 Hierarchical fusion · 9.48 M
+                 bidirectional cross-attention, scales {4, 16, 64}
+                                  │
+                                  ▼
+                 1536-d joint representation
+                                  │
+                                  ▼
+                 Head · 1.18 M   Linear → LN → GELU → Dropout → Linear
+                                  │
+                                  ▼
+                           Normal / Abnormal
 ```
 
----
+When a modality is missing, the tokens `m_ecg` and `m_pcg` take its place. The ECG encoder uses `mamba-ssm` if it is installed and otherwise uses a Transformer.
 
-## ⚙️ Installation
+## Repository layout
 
-**Prerequisites:** Python 3.11, PyTorch 2.3+ with CUDA 12.x, NVIDIA GPU with ≥ 8 GB VRAM (16 GB recommended).
+```
+configs/cfg.py              all hyperparameters and paths
+data/adapter.py             cache loader, PairedCacheDataset
+models/
+  mamba_ecg.py              ECG encoder
+  ast_pcg.py                PCG encoder
+  hier_fusion.py            multi-scale bidirectional fusion
+  ssl_heads.py              projection and reconstruction heads
+  full_model.py             end-to-end model
+pretraining/contrastive.py  cross-modal InfoNCE loss
+utils/
+  augment.py                SpecAugment, MixUp, modality dropout, soft focal loss
+  posthoc.py                temperature scaling, ensemble weighting
+  stats.py                  DeLong, McNemar, Wilcoxon, ECE
+  visualise.py              figures
+scripts/                    entry points (see Usage)
+DATASETS.md                 download links and label mappings
+```
+
+## Installation
+
+You need Python 3.11, an NVIDIA GPU with at least 8 GB of memory (16 GB recommended) and CUDA 12.x.
 
 ```bash
-# 1. Clone
 git clone https://github.com/ishtiaq-ahmed-dev/CardioFusion-SSL.git
 cd CardioFusion-SSL
-
-# 2. Create virtual environment
 python -m venv venv
-# On Windows PowerShell:
-.\venv\Scripts\Activate.ps1
-# On Linux / macOS:
-source venv/bin/activate
+source venv/bin/activate          # Windows: .\venv\Scripts\Activate.ps1
 
-# 3. Install dependencies
+# PyTorch first (nightly cu128 is needed for RTX 50-series)
+pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
 pip install -r requirements.txt
 
-# 4. (Optional) Install Mamba SSM for faster ECG encoder (Linux only)
+# optional, Linux only: Mamba ECG encoder
 pip install mamba-ssm
 ```
 
-**Optional dependencies (recommended):**
-- `mamba-ssm` — selective state-space ECG encoder; falls back to Transformer automatically
-- `librosa` — mel spectrogram computation
-- `wfdb` — for downloading and reading PhysioNet datasets
+## Data
 
----
-
-## 📥 Downloading Datasets
-
-All datasets are publicly available. See **[DATASETS.md](DATASETS.md)** for:
-- Full list of 12 datasets with URLs
-- Expected directory layout under `DATASETS_ROOT`
-- Binary-label mapping conventions
-- Original dataset citations
-
-**Quick start — download the primary training corpus:**
+All twelve datasets are public. [DATASETS.md](DATASETS.md) lists download links, the expected folder layout and how each label set is mapped to normal/abnormal. You need two of them for training:
 
 ```bash
-# Requires wfdb: pip install wfdb
-python -c "import wfdb; wfdb.dl_database('challenge-2016', dl_dir='D:/AI_LAB_RP/DATASETS/challenge-2016/1.0.0')"
-python -c "import wfdb; wfdb.dl_database('ephnogram', dl_dir='D:/AI_LAB_RP/DATASETS/ephnogram')"
+python -c "import wfdb; wfdb.dl_database('challenge-2016', dl_dir='<DATASETS_ROOT>/challenge-2016/1.0.0')"
+python -c "import wfdb; wfdb.dl_database('ephnogram',      dl_dir='<DATASETS_ROOT>/ephnogram')"
 ```
 
-Update `DATASETS_ROOT` in `configs/cfg.py` to your local path.
+Then set `DATASETS_ROOT` in [`configs/cfg.py`](configs/cfg.py).
 
----
-
-## 🚀 Usage
-
-### 1. Smoke test — verify installation works
+## Usage
 
 ```bash
+# 0. sanity check: forward and backward pass on a synthetic batch
 python -m scripts.smoke_test
-```
 
-### 2. Cross-modal SSL pretraining (~60 min on RTX 5070 Ti)
+# 1. cross-modal pretraining (contrastive + masked reconstruction, 200 epochs)
+python -m scripts.pretrain_v2
 
-```bash
-python -m scripts.pretrain
-# → checkpoints/ssl_pretrain.pt
-```
+# 2. fine-tuning, 10 subject-disjoint folds run in parallel
+python -m scripts.run_parallel_folds_v2            # --seeds 3 for a 30-model ensemble
 
-### 3. Supervised 10-fold CV fine-tuning (~1.3 h wall-clock, parallel)
+# 3. test-time augmentation on the internal folds
+python -m scripts.tta_internal_v2
 
-```bash
-# Serial (sequential 10 folds):
-python -m scripts.finetune
+# 4. external validation
+python -m scripts.run_external_eval  --ckpt-dir checkpoints_v2 --ckpt-glob "fold_*_seed_*_best.pt" --out-suffix _v2
+python -m scripts.eval_new_datasets  --ckpt-dir checkpoints_v2 --ckpt-glob "fold_*_seed_*_best.pt" --out-suffix _v2
 
-# Parallel (10 processes, one GPU):
-python -m scripts.run_parallel_folds
-```
-
-### 4. Ablation study — 5 variants × 10 folds
-
-```bash
+# 5. ablations, statistics, figures
 python -m scripts.ablation
-```
-
-### 5. External validation across 10 datasets
-
-```bash
-# Cache-based (Chapman, PTB-XL, MIT-BIH, CPSC-2018, CirCor, CinC2016 tr-b–f):
-python -m scripts.run_external_eval
-
-# Raw-file (BMD-HS, CinC2016 validation, Georgia, Ningbo):
-python -m scripts.eval_new_datasets
-```
-
-### 6. Statistical tests + calibration
-
-```bash
 python -m scripts.run_stats_tests
-# → results/statistical_tests.json (ECE, per-variant ΔAUROC)
-```
-
-### 7. Regenerate all publication plots
-
-```bash
 python -c "from utils.visualise import generate_all; generate_all()"
-# → results/plots/*.png,pdf
 ```
 
----
+`python -m scripts.run_tier23_pipeline` runs steps 1–4 end to end and logs to `results/tier23_pipeline.log`. The original v1 pipeline (`scripts.pretrain`, `scripts.run_parallel_folds`) is kept for the ablation baseline.
 
-## 🔬 Evaluation Protocol
+### Approximate runtimes (RTX 5070 Ti, 16 GB)
 
-**Subject-disjoint 10-fold cross-validation.** The 405 subjects of PhysioNet/CinC 2016 training-a are stratified by binary label and partitioned into 10 folds at the **subject level**. Since each subject has exactly one recording, this is equivalent to a recording-disjoint guarantee — zero data leakage between train and test partitions.
+| Stage | Time |
+|:---|:---:|
+| Pretraining, 200 epochs | ~2 h |
+| Fine-tuning, 10 folds × 1 seed | ~1.5 h |
+| Fine-tuning, 10 folds × 3 seeds | ~4 h |
+| Internal TTA | ~50 min |
+| External validation | ~1 h |
+| Ablations (5 variants) | ~7 h |
 
-**Why this matters.** Prior published multimodal work (e.g., PACFNet [Li et al. 2025, AUROC 0.9967]) uses beat-level 5-fold CV where heartbeats from the same subject appear in both training and test folds. This admits partial subject exposure during training and inflates reported metrics by ~7.5 percentage points on this corpus. **CardioFusion-SSL's 0.9214 AUROC is the more trustworthy figure.**
+All runs use `SEED = 1337`.
 
-**Ensemble inference.** External validation uses soft-vote probability averaging across all 10 fold checkpoints for stable AUROC estimation under distribution shift.
+## Evaluation protocol
 
-**Calibration.** Expected Calibration Error (ECE) with 10 equal-width confidence bins is reported alongside discrimination metrics.
+The 405 subjects in CinC 2016 training-a are stratified by label and split into ten folds **at the subject level**. Each subject contributes one recording, so no recording or beat from a test subject is seen during training.
 
----
+Beat-level splitting, which several earlier papers use, puts beats from the same patient on both sides of the split. On this corpus we estimate it inflates AUROC by about 7.5 points. We report subject-disjoint results only.
 
-## 🧠 Reproducing the Results
+External evaluation averages the predicted probabilities of all fold checkpoints. Calibration is reported as expected calibration error (ECE) over ten equal-width bins, before and after temperature scaling.
 
-All experiments are deterministic given the seed (`SEED = 1337` in `configs/cfg.py`). Wall-clock estimates on NVIDIA RTX 5070 Ti (16 GB VRAM):
+## Citation
 
-| Stage | Time | Output |
-|---|---|---|
-| SSL pretraining (100 epochs) | ~60 min | `checkpoints/ssl_pretrain.pt` |
-| Fine-tuning (10 folds, parallel) | ~1.3 h | `checkpoints/fold_*_best.pt` |
-| Ablation (5 variants × 10 folds) | ~7 h | `results/ablation_results.json` |
-| Cache-based external eval | ~45 min | `results/external_validation_results.json` |
-| Raw-file external eval | ~30 min | (merged into same JSON) |
-| **Full pipeline** | **~10 h wall clock** | Ready for paper |
-
----
-
-## 📚 Citation
-
-If you use this code, please cite the accompanying paper and the datasets you use (see [DATASETS.md](DATASETS.md)):
+If this code helps your work, please cite the paper and the datasets you use (see [DATASETS.md](DATASETS.md)).
 
 ```bibtex
 @article{ahmed2026cardiofusion,
@@ -303,46 +235,24 @@ If you use this code, please cite the accompanying paper and the datasets you us
 }
 ```
 
----
+## Authors
 
-## 🤝 Contributing
+**Ishtiaq Ahmed** · lead author and maintainer
+Institute of Management Sciences (IMSciences), Peshawar
+[ORCID 0009-0007-5485-211X](https://orcid.org/0009-0007-5485-211X) · [@ishtiaq-ahmed-dev](https://github.com/ishtiaq-ahmed-dev) · iashtiaqkhattak@gmail.com
 
-Issues and pull requests are welcome. Please open an issue first to discuss significant changes.
+**Dr. Abida Ambreen, MBBS** · medical review
+Khyber Medical College (KMC), Peshawar
 
----
+**Syeda Laiba Jawad** · methodology and investigation
+Institute of Management Sciences (IMSciences), Peshawar
 
-## 📜 License
+Supervised by **Mr. Ali Haider**, IMSciences Peshawar.
 
-MIT License — see [LICENSE](LICENSE) for full text. Datasets retain their original licences from the source repositories; see [DATASETS.md](DATASETS.md).
+## License
 
----
+The code is released under the [MIT License](LICENSE). Each dataset keeps its original license; see [DATASETS.md](DATASETS.md).
 
-## 👥 Authors and Contributors
-
-### Lead author / project owner
-**Ishtiaq Ahmed** — BS Artificial Intelligence, Institute of Management Sciences (IMSciences), Peshawar, Pakistan
-📧 iashtiaqkhattak@gmail.com  |  bsai.246504300@imsciences.edu.pk
-🆔 ORCID: [0009-0007-5485-211X](https://orcid.org/0009-0007-5485-211X)
-🐙 GitHub: [@ishtiaq-ahmed-dev](https://github.com/ishtiaq-ahmed-dev)
-*Conceptualization, methodology, software, investigation, formal analysis, data curation, writing — original draft, visualization.*
-
-### Co-authors
-
-**Dr. Abida Ambreen, MBBS** — Khyber Medical College (KMC), Peshawar, Pakistan
-📧 Abida.ambreen@kmc.edu.pk
-*Medical co-author — general clinical review, verification of pathology descriptions against standard medical usage, writing — review and editing.*
-
-**Syeda Laiba Jawad** — BS Artificial Intelligence, Institute of Management Sciences (IMSciences), Peshawar, Pakistan
-📧 syedalaiba689@gmail.com
-*Methodology, investigation, writing — review and editing.*
-
-### Academic supervisor
-**Mr. Ali Haider** — Institute of Management Sciences (IMSciences), Peshawar, Pakistan
-*Project supervision, methodological guidance, and mentorship throughout the CardioFusion-SSL research.*
-
-### Corresponding author
-Ishtiaq Ahmed — iashtiaqkhattak@gmail.com
-
----
-
-*This work was conducted at IMSciences Peshawar in collaboration with Khyber Medical College and is prepared for submission to Computers in Biology and Medicine (Elsevier).*
+<div align="center">
+<sub>This is a research prototype and is not a medical device. Do not use it for clinical decisions.</sub>
+</div>
